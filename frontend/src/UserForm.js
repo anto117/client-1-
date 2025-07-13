@@ -204,7 +204,7 @@ import confetti from 'canvas-confetti';
 import { motion } from 'framer-motion';
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = 'ws://localhost:5000'; // ✅ Local WebSocket URL
+const SOCKET_URL = 'https://client-1-1-kwwd.onrender.com'; // ✅ Local WebSocket URL
 
 function UserForm() {
   const [form, setForm] = useState({
@@ -282,7 +282,7 @@ function UserForm() {
     setMessage('');
 
     try {
-      const res = await axios.post('http://localhost:5000/api/book', form); // ✅ Local API
+      const res = await axios.post('https://client-1-1-kwwd.onrender.com', form); // ✅ Local API
       setMessage(res.data.message);
       socket?.emit('newBooking', form);
       launchConfetti();

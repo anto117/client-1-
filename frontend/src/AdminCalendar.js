@@ -13,7 +13,7 @@ const AdminCalendar = () => {
 
   const fetchBookings = async () => {
     try {
-      const res = await axios.get('http://localhost:5000/api/bookings');
+      const res = await axios.get('https://client-1-1-kwwd.onrender.com/api/bookings');
       setBookings(res.data);
 
       const initialStatus = {};
@@ -28,7 +28,7 @@ const AdminCalendar = () => {
 
   const markAsArrived = async (bookingId) => {
     try {
-      await axios.post(`http://localhost:5000/api/mark-arrived/${bookingId}`);
+      await axios.post(`https://client-1-1-kwwd.onrender.com/api/mark-arrived/${bookingId}`);
       setArrivedStatus(prev => ({ ...prev, [bookingId]: true }));
     } catch (err) {
       console.error('Error marking as arrived:', err);
