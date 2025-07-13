@@ -217,6 +217,12 @@ function UserForm() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState(null);
+  const SOCKET_URL = process.env.REACT_APP_API;
+
+  const newSocket = io(SOCKET_URL, {
+  transports: ['websocket', 'polling'], // fallback added
+});
+
 
   useEffect(() => {
     const newSocket = io(SOCKET_URL, {
