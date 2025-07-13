@@ -12,7 +12,12 @@ const io = new Server(server, {
   cors: { origin: '*' }
 });
 
-app.use(cors());
+app.use(cors({
+  origin: ['https://client-1-4.onrender.com'], // your frontend Render domain
+  methods: ['GET', 'POST'],
+  credentials: true,
+}));
+
 app.use(express.json());
 
 // MongoDB Schema
