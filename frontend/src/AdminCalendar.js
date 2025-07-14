@@ -70,7 +70,7 @@ const AdminCalendar = () => {
   const calendar = generateCalendar();
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', padding: '32px 24px' }}>
+    <div style={{ minHeight: '100vh', background: '#06A3DA', padding: '32px 24px' }}>
       <div style={{ maxWidth: '1200px', margin: '0 auto', background: '#ffffff', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
         {/* Calendar Header */}
         <div style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', color: '#ffffff', padding: '32px 40px', textAlign: 'center' }}>
