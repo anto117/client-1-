@@ -71,9 +71,14 @@ const AdminCalendar = () => {
 
   return (
     <div style={{ minHeight: '100vh', background: '#06A3DA', padding: '32px 24px' }}>
-      <div style={{ maxWidth: '1200px', margin: '0 auto', background: '#ffffff', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(0,0,0,0.1)' }}>
+      <img
+        src={process.env.PUBLIC_URL + '/Dental.png'}
+        alt="Dental Logo"
+        style={{ display: 'block', margin: '0 auto 24px auto', width: 120, height: 120 }}
+      />
+      <div style={{ maxWidth: '1200px', margin: '0 auto', background: 'rgba(255,255,255,0.97)', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(6,163,218,0.10)' }}>
         {/* Calendar Header */}
-        <div style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%)', color: '#ffffff', padding: '32px 40px', textAlign: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, #06A3DA 0%, #4f46e5 100%)', color: '#ffffff', padding: '32px 40px', textAlign: 'center' }}>
           <h1 style={{ fontSize: '32px', fontWeight: '700' }}>📅 Appointment Dashboard</h1>
           <p style={{ fontSize: '16px', opacity: '0.9' }}>Manage and view all scheduled appointments</p>
         </div>
@@ -81,15 +86,35 @@ const AdminCalendar = () => {
         {/* Calendar Navigation */}
         <div style={{ padding: '40px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-            <button onClick={goToPreviousMonth}>⬅ Previous</button>
-            <h2>{selectedDate.format('MMMM YYYY')}</h2>
-            <button onClick={goToNextMonth}>Next ➡</button>
+            <button style={{
+              background: '#06A3DA',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '10px 18px',
+              fontWeight: 600,
+              fontSize: '15px',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(6,163,218,0.10)'
+            }} onClick={goToPreviousMonth}>⬅ Previous</button>
+            <h2 style={{ color: '#06A3DA', fontWeight: 700 }}>{selectedDate.format('MMMM YYYY')}</h2>
+            <button style={{
+              background: '#06A3DA',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '10px 18px',
+              fontWeight: 600,
+              fontSize: '15px',
+              cursor: 'pointer',
+              boxShadow: '0 2px 8px rgba(6,163,218,0.10)'
+            }} onClick={goToNextMonth}>Next ➡</button>
           </div>
 
           {/* Calendar Grid */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: '8px' }}>
             {['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].map(day => (
-              <div key={day} style={{ fontWeight: 'bold', textAlign: 'center' }}>{day}</div>
+              <div key={day} style={{ fontWeight: 'bold', textAlign: 'center', color: '#06A3DA' }}>{day}</div>
             ))}
             {calendar.map((week, i) => (
               <React.Fragment key={i}>
@@ -102,10 +127,15 @@ const AdminCalendar = () => {
                       onClick={() => handleDateClick(day)}
                       style={{
                         padding: '12px',
-                        backgroundColor: isCurrentMonth ? (hasBookings ? '#e0f2fe' : '#fff') : '#f1f5f9',
+                        backgroundColor: isCurrentMonth ? (hasBookings ? '#e0f7ff' : '#f0faff') : '#e3e8f0',
                         borderRadius: '8px',
                         textAlign: 'center',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        border: isCurrentMonth && hasBookings ? '2px solid #06A3DA' : '1px solid #b6e6fa',
+                        color: isCurrentMonth ? '#222' : '#b0b0b0',
+                        fontWeight: hasBookings ? 700 : 400,
+                        boxShadow: hasBookings ? '0 2px 8px rgba(6,163,218,0.10)' : 'none',
+                        transition: 'all 0.2s',
                       }}
                     >
                       {day.format('D')}
@@ -118,13 +148,13 @@ const AdminCalendar = () => {
 
           {/* Appointments for Selected Date */}
           <div style={{ marginTop: '40px' }}>
-            <h3>Appointments for {selectedDate.format('MMMM D, YYYY')}</h3>
+            <h3 style={{ color: '#06A3DA', fontWeight: 700 }}>Appointments for {selectedDate.format('MMMM D, YYYY')}</h3>
             {getBookingsForDate(selectedDate).length === 0 ? (
-              <p>No appointments.</p>
+              <p style={{ color: '#888' }}>No appointments.</p>
             ) : (
               getBookingsForDate(selectedDate).map((booking) => (
-                <div key={booking._id} style={{ background: '#f8fafc', border: '1px solid #ccc', borderRadius: '10px', padding: '16px', margin: '10px 0' }}>
-                  <p><strong>Name:</strong> {booking.name}</p>
+                <div key={booking._id} style={{ background: '#f0faff', border: '1.5px solid #06A3DA', borderRadius: '10px', padding: '16px', margin: '10px 0', boxShadow: '0 2px 8px rgba(6,163,218,0.10)' }}>
+                  <p style={{ color: '#06A3DA', fontWeight: 600 }}><strong>Name:</strong> {booking.name}</p>
                   <p><strong>Email:</strong> {booking.email}</p>
                   <p><strong>Phone:</strong> {booking.phone}</p>
                   <p><strong>Time:</strong> {moment(booking.datetime).format('hh:mm A')}</p>
@@ -133,12 +163,14 @@ const AdminCalendar = () => {
                     disabled={arrivedStatus[booking._id]}
                     style={{
                       marginTop: '10px',
-                      backgroundColor: arrivedStatus[booking._id] ? 'green' : '#4f46e5',
+                      backgroundColor: arrivedStatus[booking._id] ? '#1ecb7c' : '#06A3DA',
                       color: '#fff',
                       padding: '8px 12px',
                       border: 'none',
                       borderRadius: '6px',
-                      cursor: arrivedStatus[booking._id] ? 'default' : 'pointer'
+                      cursor: arrivedStatus[booking._id] ? 'default' : 'pointer',
+                      fontWeight: 600,
+                      boxShadow: '0 2px 8px rgba(6,163,218,0.10)'
                     }}
                   >
                     {arrivedStatus[booking._id] ? '✅ Arrived' : '🚶 Mark as Arrived'}

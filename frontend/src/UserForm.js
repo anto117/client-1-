@@ -105,6 +105,11 @@ function UserForm() {
       transition={{ duration: 0.6 }}
       style={containerStyle}
     >
+      <img
+        src={process.env.PUBLIC_URL + '/Dental.png'}
+        alt="Dental Logo"
+        style={{ display: 'block', margin: '0 auto 24px auto', width: 120, height: 120 }}
+      />
       <form onSubmit={handleSubmit} style={formStyle}>
         {['name', 'email', 'phone', 'datetime'].map((field, index) => (
           <motion.input
@@ -187,26 +192,41 @@ function UserForm() {
 
 // ✅ Styles
 const containerStyle = { width: '100%' };
-const formStyle = { display: 'flex', flexDirection: 'column', gap: '15px' };
-const inputStyle = {
-  padding: '10px',
-  fontSize: '16px',
-  borderRadius: '6px',
-  border: '1px solid #ccc',
-  outline: 'none',
-  transition: 'all 0.3s ease',
+const formStyle = {
+  display: 'flex',
+  flexDirection: 'column',
+  gap: '15px',
+  background: 'rgba(255,255,255,0.95)',
+  borderRadius: '16px',
+  padding: '32px 24px',
+  boxShadow: '0 8px 32px rgba(6,163,218,0.10)',
+  maxWidth: 400,
+  margin: '0 auto',
 };
-const buttonStyle = {
+const inputStyle = {
   padding: '12px',
   fontSize: '16px',
-  borderRadius: '6px',
-  backgroundColor: '#007bff',
+  borderRadius: '8px',
+  border: '1.5px solid #06A3DA',
+  outline: 'none',
+  transition: 'all 0.3s ease',
+  background: '#f0faff',
+};
+const buttonStyle = {
+  padding: '14px',
+  fontSize: '16px',
+  borderRadius: '8px',
+  backgroundColor: '#06A3DA',
   color: 'white',
   border: 'none',
+  fontWeight: 600,
+  letterSpacing: 1,
+  boxShadow: '0 2px 8px rgba(6,163,218,0.10)',
 };
 const messageStyle = {
   marginTop: '10px',
   textAlign: 'center',
+  fontWeight: 500,
 };
 
 export default UserForm;
