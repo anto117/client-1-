@@ -378,7 +378,7 @@ function UserForm() {
 }
 
 // ✅ Styles
-const containerStyle = { width: '100%' };
+const containerStyle = { width: '100%', background: '#06A3DA' };
 const formStyle = { display: 'flex', flexDirection: 'column', gap: '15px' };
 const inputStyle = {
   padding: '10px',
