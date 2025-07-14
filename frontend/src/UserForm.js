@@ -204,7 +204,7 @@ import confetti from 'canvas-confetti';
 import { motion } from 'framer-motion';
 import { io } from 'socket.io-client';
 
-const SOCKET_URL = 'https://client-1-1-kwwd.onrender.com'; // ✅ Local WebSocket URL
+const SOCKET_URL = process.env.REACT_APP_API; // ✅ Set from .env
 
 function UserForm() {
   const [form, setForm] = useState({
@@ -217,29 +217,20 @@ function UserForm() {
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
   const [socket, setSocket] = useState(null);
-  const SOCKET_URL = process.env.REACT_APP_API;
-
-  const newSocket = io(SOCKET_URL, {
-  transports: ['websocket', 'polling'], // fallback added
-});
-
 
   useEffect(() => {
     const newSocket = io(SOCKET_URL, {
-      transports: ['websocket'],
+      transports: ['websocket', 'polling'],
     });
-
     setSocket(newSocket);
 
     newSocket.on('bookingConfirmed', (data) => {
-      console.log('Booking Confirmed:', data);
+      console.log('✅ Booking Confirmed:', data);
       setMessage(`Booking Confirmed for ${data.name}`);
       launchConfetti();
     });
 
-    return () => {
-      newSocket.disconnect();
-    };
+    return () => newSocket.disconnect();
   }, []);
 
   const handleChange = (e) => {
@@ -272,13 +263,13 @@ function UserForm() {
 
     const selectedDate = new Date(form.datetime);
     const day = selectedDate.getDay();
+    const hours = selectedDate.getHours();
 
     if (day === 0) {
-      setMessage('Bookings are not available on Sundays. Please select another day.');
+      setMessage('Bookings are not available on Sundays.');
       return;
     }
 
-    const hours = selectedDate.getHours();
     if (hours < 9 || hours >= 17) {
       setMessage('Please select a time between 9:00 AM and 5:00 PM.');
       return;
@@ -288,7 +279,7 @@ function UserForm() {
     setMessage('');
 
     try {
-      const res = await axios.post('https://client-1-1-kwwd.onrender.com', form); // ✅ Local API
+      const res = await axios.post(`${SOCKET_URL}/api/book`, form); // ✅ Correct API endpoint
       setMessage(res.data.message);
       socket?.emit('newBooking', form);
       launchConfetti();
@@ -335,8 +326,6 @@ function UserForm() {
             style={inputStyle}
             whileFocus={{
               scale: 1.02,
-              borderColor: '#007bff',
-              boxShadow: '0 0 8px rgba(0, 123, 255, 0.3)',
             }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -388,8 +377,7 @@ function UserForm() {
   );
 }
 
-// Styles
-
+// ✅ Styles
 const containerStyle = { width: '100%' };
 const formStyle = { display: 'flex', flexDirection: 'column', gap: '15px' };
 const inputStyle = {
@@ -414,3 +402,4 @@ const messageStyle = {
 };
 
 export default UserForm;
+
