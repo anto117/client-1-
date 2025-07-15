@@ -100,7 +100,12 @@ function UserForm() {
       <img
         src={process.env.PUBLIC_URL + '/Dental.png'}
         alt="Dental Logo"
-        style={{ display: 'block', margin: '0 auto 24px auto', width: 120, height: 120 }}
+        style={{
+          display: 'block',
+          margin: '0 auto 24px auto',
+          width: 120,
+          height: 120,
+        }}
       />
       <form onSubmit={handleSubmit} style={formStyle}>
         {['name', 'email', 'phone', 'datetime'].map((field, index) => (
@@ -182,7 +187,7 @@ function UserForm() {
   );
 }
 
-// ✅ Styles
+// Styles
 const containerStyle = { width: '100%' };
 const formStyle = {
   display: 'flex',

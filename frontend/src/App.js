@@ -22,7 +22,7 @@ function App() {
                 padding: '20px',
                 fontFamily:
                   '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                backgroundColor: '#2563eb', // ✅ solid blue
                 position: 'relative',
                 overflow: 'hidden',
               }}
@@ -53,7 +53,7 @@ function App() {
                 }}
               />
 
-              {/* Heading ABOVE the card */}
+              {/* Heading */}
               <motion.h1
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -88,18 +88,12 @@ function App() {
                   zIndex: 1,
                 }}
               >
-                <div
-                  style={{
-                    textAlign: 'center',
-                    marginBottom: '30px',
-                  }}
-                >
+                <div style={{ textAlign: 'center', marginBottom: '30px' }}>
                   <div
                     style={{
                       width: '60px',
                       height: '60px',
-                      background:
-                        'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                      background: '#2563eb',
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
