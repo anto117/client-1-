@@ -7,11 +7,15 @@ import { io } from 'socket.io-client';
 const SOCKET_URL = process.env.REACT_APP_API; // ✅ Set from .env
 
 function UserForm() {
-  // ✅ Set body background color inline
+  // ✅ Set body background color inline (blue)
   useEffect(() => {
-    document.body.style.backgroundColor = '#f0f8ff';
+    document.body.style.backgroundColor = '#06A3DA';
+    document.body.style.margin = '0';
+    document.body.style.minHeight = '100vh';
     return () => {
       document.body.style.backgroundColor = null;
+      document.body.style.margin = null;
+      document.body.style.minHeight = null;
     };
   }, []);
 
