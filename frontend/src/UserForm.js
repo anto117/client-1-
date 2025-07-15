@@ -9,7 +9,7 @@ const SOCKET_URL = process.env.REACT_APP_API; // ✅ Set from .env
 function UserForm() {
   // ✅ Set body background color inline
   useEffect(() => {
-    document.body.style.backgroundColor = '#06A3DA';
+    document.body.style.backgroundColor = '#f0f8ff';
     return () => {
       document.body.style.backgroundColor = null;
     };
