@@ -3,16 +3,17 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
+const fs = require('fs');
+const { google } = require('googleapis');
 const http = require('http');
 const { Server } = require('socket.io');
 
 const app = express();
 const server = http.createServer(app);
 
-// ✅ Use correct client URL
-const CLIENT_URL = 'https://client-1-4.onrender.com';
+// ✅ Deployed frontend URL (Render)
+const CLIENT_URL = 'https://client-1-hwye.onrender.com';
 
-// ✅ Allow frontend to access this API
 app.use(cors({
   origin: CLIENT_URL,
   methods: ['GET', 'POST'],
@@ -50,8 +51,14 @@ const bookingSchema = new mongoose.Schema({
     expires: '30d',
   },
 });
-
 const Booking = mongoose.model('Booking', bookingSchema);
+
+// ✅ Google Calendar auth
+const auth = new google.auth.GoogleAuth({
+  credentials: require('./madukkakuzhy-calendar-6d25078c6f60.json'),
+  scopes: ['https://www.googleapis.com/auth/calendar'],
+});
+const calendar = google.calendar({ version: 'v3', auth });
 
 // ✅ Routes
 app.get('/', (req, res) => {
@@ -81,6 +88,25 @@ app.post('/api/book', async (req, res) => {
 
   io.emit('bookingConfirmed', { name, datetime, phone });
 
+  // ✅ Add event to Google Calendar
+  try {
+    const calendarRes = await calendar.events.insert({
+      calendarId: 'antosreju400@gmail.com',
+      requestBody: {
+        summary: `Appointment: ${name}`,
+        description: `Phone: ${phone}\nEmail: ${email}`,
+        start: { dateTime: new Date(datetime).toISOString() },
+        end: {
+          dateTime: new Date(new Date(datetime).getTime() + 30 * 60000).toISOString(),
+        },
+      },
+    });
+    console.log('📅 Event added to Google Calendar:', calendarRes.data.htmlLink);
+  } catch (err) {
+    console.error('❌ Failed to add to Google Calendar:', err);
+  }
+
+  // ✅ Send confirmation email
   if (email?.trim()) {
     try {
       await transporter.sendMail({
@@ -119,17 +145,15 @@ app.post('/api/mark-arrived/:id', async (req, res) => {
   }
 });
 
-// ✅ Setup WebSocket server
+// ✅ WebSocket server
 const io = new Server(server, {
   cors: {
     origin: CLIENT_URL,
     methods: ['GET', 'POST'],
   },
 });
-
 io.on('connection', (socket) => {
   console.log('🟢 WebSocket connected:', socket.id);
-
   socket.on('disconnect', () => {
     console.log('🔴 Client disconnected:', socket.id);
   });

@@ -4,6 +4,7 @@ import confetti from 'canvas-confetti';
 import { motion } from 'framer-motion';
 import { io } from 'socket.io-client';
 
+// ✅ Local backend URL from .env
 const SOCKET_URL = process.env.REACT_APP_API;
 
 function UserForm() {
