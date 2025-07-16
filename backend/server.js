@@ -95,13 +95,18 @@ app.post('/api/book', async (req, res) => {
       requestBody: {
         summary: `Appointment: ${name}`,
         description: `Phone: ${phone}\nEmail: ${email}`,
-        start: { dateTime: new Date(datetime).toISOString() },
+        start: {
+          dateTime: new Date(datetime).toISOString(),
+          timeZone: 'Asia/Kolkata'
+        },
         end: {
           dateTime: new Date(new Date(datetime).getTime() + 30 * 60000).toISOString(),
+          timeZone: 'Asia/Kolkata'
         },
       },
     });
     console.log('📅 Event added to Google Calendar:', calendarRes.data.htmlLink);
+    console.log('✅ Full Calendar Event Response:', calendarRes.data);
   } catch (err) {
     console.error('❌ Failed to add to Google Calendar:', err);
   }
