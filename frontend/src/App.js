@@ -22,7 +22,7 @@ function App() {
                 padding: '20px',
                 fontFamily:
                   '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif',
-                backgroundColor: '#2563eb', // ✅ solid blue
+                backgroundColor: '#5E786B', // ✅ solid blue
                 position: 'relative',
                 overflow: 'hidden',
               }}

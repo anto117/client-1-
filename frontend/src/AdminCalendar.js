@@ -70,15 +70,15 @@ const AdminCalendar = () => {
   const calendar = generateCalendar();
 
   return (
-    <div style={{ minHeight: '100vh', background: '#06A3DA', padding: '32px 24px' }}>
+    <div style={{ minHeight: '100vh', background: '#5E786B', padding: '32px 24px' }}>
       <img
         src={process.env.PUBLIC_URL + '/Dental.png'}
         alt="Dental Logo"
         style={{ display: 'block', margin: '0 auto 24px auto', width: 120, height: 120 }}
       />
-      <div style={{ maxWidth: '1200px', margin: '0 auto', background: 'rgba(255,255,255,0.97)', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 40px rgba(6,163,218,0.10)' }}>
+      <div style={{ maxWidth: '1200px', margin: '0 auto', background: 'rgba(255,255,255,0.97)', borderRadius: '20px', overflow: 'hidden', boxShadow: '0 20px 40px #5E786B' }}>
         {/* Calendar Header */}
-        <div style={{ background: 'linear-gradient(135deg, #06A3DA 0%, #4f46e5 100%)', color: '#ffffff', padding: '32px 40px', textAlign: 'center' }}>
+        <div style={{ background: 'linear-gradient(135deg, #5E786B 0%, #5E786B 100%)', color: '#ffffff', padding: '32px 40px', textAlign: 'center' }}>
           <h1 style={{ fontSize: '32px', fontWeight: '700' }}>📅 Appointment Dashboard</h1>
           <p style={{ fontSize: '16px', opacity: '0.9' }}>Manage and view all scheduled appointments</p>
         </div>
@@ -87,7 +87,7 @@ const AdminCalendar = () => {
         <div style={{ padding: '40px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
             <button style={{
-              background: '#06A3DA',
+              background: '#5E786B',
               color: '#fff',
               border: 'none',
               borderRadius: '8px',
@@ -95,11 +95,11 @@ const AdminCalendar = () => {
               fontWeight: 600,
               fontSize: '15px',
               cursor: 'pointer',
-              boxShadow: '0 2px 8px rgba(6,163,218,0.10)'
+              boxShadow: '0 2px 8px #5E786B'
             }} onClick={goToPreviousMonth}>⬅ Previous</button>
             <h2 style={{ color: '#06A3DA', fontWeight: 700 }}>{selectedDate.format('MMMM YYYY')}</h2>
             <button style={{
-              background: '#06A3DA',
+              background: '#5E786B',
               color: '#fff',
               border: 'none',
               borderRadius: '8px',

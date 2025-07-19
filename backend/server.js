@@ -3,33 +3,27 @@ const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
 const nodemailer = require('nodemailer');
-const fs = require('fs');
-const { google } = require('googleapis');
 const http = require('http');
 const { Server } = require('socket.io');
+const axios = require('axios');
 
 const app = express();
 const server = http.createServer(app);
-
-// ✅ Deployed frontend URL (Render)
-const CLIENT_URL = 'https://client-1-hwye.onrender.com';
+const CLIENT_URL = 'http://localhost:3000';
 
 app.use(cors({
   origin: CLIENT_URL,
   methods: ['GET', 'POST'],
   credentials: true,
 }));
-
 app.use(express.json());
 
-// ✅ Connect to MongoDB
 mongoose.connect(process.env.MONGO_URI, {
   useNewUrlParser: true,
   useUnifiedTopology: true,
 }).then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// ✅ Email setup
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -38,7 +32,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// ✅ Booking schema
 const bookingSchema = new mongoose.Schema({
   name: String,
   email: String,
@@ -53,14 +46,6 @@ const bookingSchema = new mongoose.Schema({
 });
 const Booking = mongoose.model('Booking', bookingSchema);
 
-// ✅ Google Calendar auth
-const auth = new google.auth.GoogleAuth({
-  credentials: require('./madukkakuzhy-calendar-6d25078c6f60.json'),
-  scopes: ['https://www.googleapis.com/auth/calendar'],
-});
-const calendar = google.calendar({ version: 'v3', auth });
-
-// ✅ Routes
 app.get('/', (req, res) => {
   res.send('API is running');
 });
@@ -88,27 +73,26 @@ app.post('/api/book', async (req, res) => {
 
   io.emit('bookingConfirmed', { name, datetime, phone });
 
-  // ✅ Add event to Google Calendar
+  // ✅ Add to Cal.com
   try {
-    const calendarRes = await calendar.events.insert({
-      calendarId: 'antosreju400@gmail.com',
-      requestBody: {
-        summary: `Appointment: ${name}`,
-        description: `Phone: ${phone}\nEmail: ${email}`,
-        start: {
-          dateTime: new Date(datetime).toISOString(),
-          timeZone: 'Asia/Kolkata'
-        },
-        end: {
-          dateTime: new Date(new Date(datetime).getTime() + 30 * 60000).toISOString(),
-          timeZone: 'Asia/Kolkata'
-        },
+    const calRes = await axios.post(
+      'https://api.cal.com/v1/bookings',
+      {
+        event: parseInt(process.env.CAL_EVENT_ID),
+        title: `Appointment with ${name}`,
+        startTime: new Date(datetime).toISOString(),
+        attendees: [{ name, email }],
       },
-    });
-    console.log('📅 Event added to Google Calendar:', calendarRes.data.htmlLink);
-    console.log('✅ Full Calendar Event Response:', calendarRes.data);
+      {
+        headers: {
+          apiKey: process.env.CAL_API_KEY,
+          'Content-Type': 'application/json',
+        },
+      }
+    );
+    console.log('📆 Booked on Cal.com:', calRes.data);
   } catch (err) {
-    console.error('❌ Failed to add to Google Calendar:', err);
+    console.error('❌ Failed to create Cal.com booking:', err.response?.data || err.message);
   }
 
   // ✅ Send confirmation email
@@ -150,7 +134,36 @@ app.post('/api/mark-arrived/:id', async (req, res) => {
   }
 });
 
-// ✅ WebSocket server
+// ✅ Handle incoming webhooks from Cal.com
+app.post('/api/webhook', async (req, res) => {
+  try {
+    const event = req.body.type || req.body.event;
+    const payload = req.body.payload || req.body;
+
+    console.log('📩 Webhook received:', event);
+
+    if (event === 'booking.created' || event === 'Booking Created') {
+      const name = payload?.attendees?.[0]?.name || 'Unknown';
+      const email = payload?.attendees?.[0]?.email || '';
+      const datetime = payload?.startTime;
+
+      const existing = await Booking.findOne({ datetime });
+      if (!existing) {
+        const booking = new Booking({ name, email, phone: 'N/A', datetime });
+        await booking.save();
+        console.log('✅ Saved booking from webhook');
+      } else {
+        console.log('ℹ️ Booking already exists for this time');
+      }
+    }
+
+    res.sendStatus(200);
+  } catch (err) {
+    console.error('❌ Webhook error:', err);
+    res.status(500).send('Error processing webhook');
+  }
+});
+
 const io = new Server(server, {
   cors: {
     origin: CLIENT_URL,
@@ -164,7 +177,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// ✅ Start server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
