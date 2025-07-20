@@ -13,7 +13,7 @@ const AdminCalendar = () => {
 
   const fetchBookings = async () => {
     try {
-      const res = await axios.get('https://client-1-mfoh.onrender.com/api/bookings'); // ✅ Updated URL
+      const res = await axios.get('https://client-1-mfoh.onrender.com/api/bookings');
       setBookings(res.data);
 
       const statusMap = {};
@@ -28,7 +28,7 @@ const AdminCalendar = () => {
 
   const markAsArrived = async (id) => {
     try {
-      await axios.post(`https://client-1-mfoh.onrender.com/api/mark-arrived/${id}`); // ✅ Updated URL
+      await axios.post(`https://client-1-mfoh.onrender.com/api/mark-arrived/${id}`);
       setArrivedStatus(prev => ({ ...prev, [id]: true }));
     } catch (err) {
       console.error('Error marking as arrived:', err);
