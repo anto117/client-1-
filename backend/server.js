@@ -17,6 +17,10 @@ const allowedOrigins = [
   'https://client-1-1-2ord.onrender.com'
 ];
 
+// ✅ Parse JSON first (important!)
+app.use(express.json());
+
+// ✅ Apply CORS next
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -29,7 +33,8 @@ app.use(cors({
   credentials: true,
 }));
 
-app.use(express.json());
+// ✅ Webhook-specific JSON parser
+app.use('/api/webhook', express.json({ type: 'application/json' }));
 
 // ✅ MongoDB
 mongoose.connect(process.env.MONGO_URI)
@@ -45,7 +50,7 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// ✅ Google Calendar Setup (from environment variables)
+// ✅ Google Calendar Setup
 const credentials = {
   type: process.env.GOOGLE_TYPE,
   project_id: process.env.GOOGLE_PROJECT_ID,
@@ -135,7 +140,7 @@ app.post('/api/book', async (req, res) => {
     console.error('❌ Cal.com error:', err.response?.data || err.message);
   }
 
-  // ✅ Google Calendar Insertion (no attendees)
+  // ✅ Google Calendar
   try {
     const authClient = await auth.getClient();
     const calendarId = 'madukkakuzhydental1@gmail.com';
@@ -164,7 +169,7 @@ app.post('/api/book', async (req, res) => {
     console.error('❌ Google Calendar error:', error.message);
   }
 
-  // ✅ Email Confirmation
+  // ✅ Send Email
   if (email?.trim()) {
     try {
       await transporter.sendMail({
