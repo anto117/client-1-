@@ -10,13 +10,25 @@ const { google } = require('googleapis');
 
 const app = express();
 const server = http.createServer(app);
-const CLIENT_URL = 'http://localhost:3000'; // Update to frontend URL when deployed
+
+// ✅ Allow both localhost and deployed frontend
+const allowedOrigins = [
+  'http://localhost:3000',
+  'https://client-1-1-2ord.onrender.com'
+];
 
 app.use(cors({
-  origin: CLIENT_URL,
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   methods: ['GET', 'POST'],
   credentials: true,
 }));
+
 app.use(express.json());
 
 // ✅ MongoDB
@@ -223,7 +235,7 @@ app.post('/api/webhook', async (req, res) => {
 // ✅ WebSocket Setup
 const io = new Server(server, {
   cors: {
-    origin: CLIENT_URL,
+    origin: allowedOrigins,
     methods: ['GET', 'POST'],
   },
 });
