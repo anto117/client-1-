@@ -6,6 +6,8 @@ const nodemailer = require('nodemailer');
 const http = require('http');
 const { Server } = require('socket.io');
 const axios = require('axios');
+const { google } = require('googleapis');
+const serviceAccount = require('./quantum-toolbox-466507-n4-b98cb35ded63.json'); // 👈 Update with your JSON filename
 
 const app = express();
 const server = http.createServer(app);
@@ -18,12 +20,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-}).then(() => console.log('✅ MongoDB connected'))
+// ✅ MongoDB Connection
+mongoose.connect(process.env.MONGO_URI)
+  .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
+// ✅ Nodemailer Setup
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -32,12 +34,26 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// ✅ Google Calendar Setup
+const calendar = google.calendar('v3');
+const auth = new google.auth.GoogleAuth({
+  credentials: serviceAccount,
+  scopes: ['https://www.googleapis.com/auth/calendar'],
+});
+
+// ✅ Booking Schema
 const bookingSchema = new mongoose.Schema({
   name: String,
   email: String,
   phone: String,
-  datetime: String,
-  arrived: { type: Boolean, default: false },
+  datetime: {
+    type: Date,
+    required: true
+  },
+  arrived: {
+    type: Boolean,
+    default: false
+  },
   createdAt: {
     type: Date,
     default: Date.now,
@@ -46,6 +62,7 @@ const bookingSchema = new mongoose.Schema({
 });
 const Booking = mongoose.model('Booking', bookingSchema);
 
+// ✅ Routes
 app.get('/', (req, res) => {
   res.send('API is running');
 });
@@ -63,17 +80,17 @@ app.post('/api/book', async (req, res) => {
     return res.status(400).json({ message: 'Name, valid phone, and Date/Time are required' });
   }
 
-  const existing = await Booking.findOne({ datetime });
+  const existing = await Booking.findOne({ datetime: new Date(datetime) });
   if (existing) {
     return res.status(409).json({ message: 'Time slot is already booked' });
   }
 
-  const booking = new Booking({ name, email, phone, datetime });
+  const booking = new Booking({ name, email, phone, datetime: new Date(datetime) });
   await booking.save();
 
   io.emit('bookingConfirmed', { name, datetime, phone });
 
-  // ✅ Add to Cal.com
+  // ✅ Cal.com API Integration
   try {
     const calRes = await axios.post(
       'https://api.cal.com/v1/bookings',
@@ -95,7 +112,36 @@ app.post('/api/book', async (req, res) => {
     console.error('❌ Failed to create Cal.com booking:', err.response?.data || err.message);
   }
 
-  // ✅ Send confirmation email
+  // ✅ Google Calendar Insertion (without attendees)
+  try {
+    const authClient = await auth.getClient();
+    const calendarId = 'madukkakuzhydental1@gmail.com'; // 👈 Your calendar email ID
+
+    const event = {
+      summary: `Appointment - ${name}`,
+      description: `Phone: ${phone}, Email: ${email}`,
+      start: {
+        dateTime: new Date(datetime).toISOString(),
+        timeZone: 'Asia/Kolkata',
+      },
+      end: {
+        dateTime: new Date(new Date(datetime).getTime() + 30 * 60000).toISOString(),
+        timeZone: 'Asia/Kolkata',
+      },
+    };
+
+    await calendar.events.insert({
+      auth: authClient,
+      calendarId,
+      resource: event,
+    });
+
+    console.log('📅 Event added to Google Calendar');
+  } catch (error) {
+    console.error('❌ Google Calendar error:', error.message);
+  }
+
+  // ✅ Email Confirmation
   if (email?.trim()) {
     try {
       await transporter.sendMail({
@@ -134,7 +180,6 @@ app.post('/api/mark-arrived/:id', async (req, res) => {
   }
 });
 
-// ✅ Handle incoming webhooks from Cal.com
 app.post('/api/webhook', async (req, res) => {
   try {
     const event = req.body.type || req.body.event;
@@ -147,13 +192,13 @@ app.post('/api/webhook', async (req, res) => {
       const email = payload?.attendees?.[0]?.email || '';
       const datetime = payload?.startTime;
 
-      const existing = await Booking.findOne({ datetime });
-      if (!existing) {
-        const booking = new Booking({ name, email, phone: 'N/A', datetime });
+      const exists = await Booking.findOne({ datetime: new Date(datetime) });
+      if (!exists) {
+        const booking = new Booking({ name, email, phone: 'N/A', datetime: new Date(datetime) });
         await booking.save();
         console.log('✅ Saved booking from webhook');
       } else {
-        console.log('ℹ️ Booking already exists for this time');
+        console.log('ℹ️ Booking already exists');
       }
     }
 
@@ -164,6 +209,7 @@ app.post('/api/webhook', async (req, res) => {
   }
 });
 
+// ✅ WebSocket
 const io = new Server(server, {
   cors: {
     origin: CLIENT_URL,
@@ -177,6 +223,7 @@ io.on('connection', (socket) => {
   });
 });
 
+// ✅ Server Start
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);

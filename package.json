@@ -16,8 +16,8 @@
     "url": "https://github.com/anto117/client-1-/issues"
   },
   "homepage": "https://github.com/anto117/client-1-#readme",
-  "description": "",
   "dependencies": {
     "googleapis": "^153.0.0"
-  }
+  },
+  "description": ""
 }
