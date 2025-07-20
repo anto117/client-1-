@@ -55,3 +55,4 @@ backend/*.json
 
 .env
 /frontend/.env
+node_modules
