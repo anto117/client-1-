@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import moment from 'moment';
+import moment from 'moment-timezone'; // 👈 use moment-timezone
 
 const AdminCalendar = () => {
   const [bookings, setBookings] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(moment());
+  const [selectedDate, setSelectedDate] = useState(moment().tz("Asia/Kolkata"));
   const [arrivedStatus, setArrivedStatus] = useState({});
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const AdminCalendar = () => {
 
   const getBookingsForDate = (date) => {
     return bookings.filter((b) =>
-      moment(b.datetime).isSame(moment(date), 'day')
+      moment(b.datetime).tz("Asia/Kolkata").isSame(moment(date).tz("Asia/Kolkata"), 'day')
     );
   };
 
@@ -113,7 +113,7 @@ const AdminCalendar = () => {
                 <p><strong>Name:</strong> {b.name}</p>
                 <p><strong>Email:</strong> {b.email}</p>
                 <p><strong>Phone:</strong> {b.phone}</p>
-                <p><strong>Time:</strong> {moment(b.datetime).format('hh:mm A')}</p>
+                <p><strong>Time:</strong> {moment(b.datetime).tz("Asia/Kolkata").format('hh:mm A')}</p>
                 <button
                   disabled={arrivedStatus[b._id]}
                   onClick={() => markAsArrived(b._id)}
