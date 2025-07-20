@@ -17,7 +17,8 @@
   },
   "homepage": "https://github.com/anto117/client-1-#readme",
   "dependencies": {
-    "googleapis": "^153.0.0"
+    "googleapis": "^153.0.0",
+    "moment-timezone": "^0.6.0"
   },
   "description": ""
 }
