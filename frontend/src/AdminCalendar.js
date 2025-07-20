@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import moment from 'moment-timezone'; // 👈 use moment-timezone
+import moment from 'moment-timezone';
 
 const AdminCalendar = () => {
   const [bookings, setBookings] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(moment().tz("Asia/Kolkata"));
+  const [selectedDate, setSelectedDate] = useState(moment());
   const [arrivedStatus, setArrivedStatus] = useState({});
 
   useEffect(() => {
@@ -37,7 +37,7 @@ const AdminCalendar = () => {
 
   const getBookingsForDate = (date) => {
     return bookings.filter((b) =>
-      moment(b.datetime).tz("Asia/Kolkata").isSame(moment(date).tz("Asia/Kolkata"), 'day')
+      moment(b.datetime).tz('Asia/Kolkata').isSame(moment(date).tz('Asia/Kolkata'), 'day')
     );
   };
 
@@ -66,14 +66,12 @@ const AdminCalendar = () => {
       <div style={{ background: '#fff', padding: 32, borderRadius: 12, boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}>
         <h1 style={{ textAlign: 'center', color: '#06A3DA' }}>📅 Admin Dashboard</h1>
 
-        {/* Navigation */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', margin: '20px 0' }}>
           <button onClick={() => setSelectedDate(prev => moment(prev).subtract(1, 'month'))}>⬅ Previous</button>
           <h2>{selectedDate.format('MMMM YYYY')}</h2>
           <button onClick={() => setSelectedDate(prev => moment(prev).add(1, 'month'))}>Next ➡</button>
         </div>
 
-        {/* Calendar Grid */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 8 }}>
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
             <div key={day} style={{ fontWeight: 'bold', textAlign: 'center' }}>{day}</div>
@@ -102,7 +100,6 @@ const AdminCalendar = () => {
           ))}
         </div>
 
-        {/* Booking List */}
         <div style={{ marginTop: 30 }}>
           <h3>Appointments for {selectedDate.format('MMMM Do, YYYY')}</h3>
           {getBookingsForDate(selectedDate).length === 0 ? (
@@ -113,7 +110,7 @@ const AdminCalendar = () => {
                 <p><strong>Name:</strong> {b.name}</p>
                 <p><strong>Email:</strong> {b.email}</p>
                 <p><strong>Phone:</strong> {b.phone}</p>
-                <p><strong>Time:</strong> {moment(b.datetime).tz("Asia/Kolkata").format('hh:mm A')}</p>
+                <p><strong>Time:</strong> {moment(b.datetime).tz('Asia/Kolkata').format('hh:mm A')}</p>
                 <button
                   disabled={arrivedStatus[b._id]}
                   onClick={() => markAsArrived(b._id)}
