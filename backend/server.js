@@ -7,6 +7,7 @@ const http = require('http');
 const { Server } = require('socket.io');
 const axios = require('axios');
 const { google } = require('googleapis');
+const moment = require('moment-timezone');
 
 const app = express();
 const server = http.createServer(app);
@@ -14,13 +15,11 @@ const server = http.createServer(app);
 // ✅ Allow both localhost and deployed frontend
 const allowedOrigins = [
   'http://localhost:3000',
-  'https://client-1-1-2ord.onrender.com'
+  'https://client-1-1-2ord.onrender.com',
 ];
 
-// ✅ Parse JSON first (important!)
 app.use(express.json());
 
-// ✅ Apply CORS next
 app.use(cors({
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -33,7 +32,7 @@ app.use(cors({
   credentials: true,
 }));
 
-// ✅ Webhook-specific JSON parser
+// Webhook-specific parser
 app.use('/api/webhook', express.json({ type: 'application/json' }));
 
 // ✅ MongoDB
@@ -108,15 +107,17 @@ app.post('/api/book', async (req, res) => {
     return res.status(400).json({ message: 'Name, valid phone, and Date/Time are required' });
   }
 
-  const existing = await Booking.findOne({ datetime: new Date(datetime) });
+  const istDate = moment.tz(datetime, 'Asia/Kolkata').toDate();
+
+  const existing = await Booking.findOne({ datetime: istDate });
   if (existing) {
     return res.status(409).json({ message: 'Time slot is already booked' });
   }
 
-  const booking = new Booking({ name, email, phone, datetime: new Date(datetime) });
+  const booking = new Booking({ name, email, phone, datetime: istDate });
   await booking.save();
 
-  io.emit('bookingConfirmed', { name, datetime, phone });
+  io.emit('bookingConfirmed', { name, datetime: istDate, phone });
 
   // ✅ Cal.com API
   try {
@@ -125,7 +126,7 @@ app.post('/api/book', async (req, res) => {
       {
         event: parseInt(process.env.CAL_EVENT_ID),
         title: `Appointment with ${name}`,
-        startTime: new Date(datetime).toISOString(),
+        startTime: istDate.toISOString(),
         attendees: [{ name, email }],
       },
       {
@@ -149,11 +150,11 @@ app.post('/api/book', async (req, res) => {
       summary: `Appointment - ${name}`,
       description: `Phone: ${phone}, Email: ${email}`,
       start: {
-        dateTime: new Date(datetime).toISOString(),
+        dateTime: istDate.toISOString(),
         timeZone: 'Asia/Kolkata',
       },
       end: {
-        dateTime: new Date(new Date(datetime).getTime() + 30 * 60000).toISOString(),
+        dateTime: new Date(istDate.getTime() + 30 * 60000).toISOString(),
         timeZone: 'Asia/Kolkata',
       },
     };
@@ -219,10 +220,11 @@ app.post('/api/webhook', async (req, res) => {
       const name = payload?.attendees?.[0]?.name || 'Unknown';
       const email = payload?.attendees?.[0]?.email || '';
       const datetime = payload?.startTime;
+      const istDate = moment.tz(datetime, 'Asia/Kolkata').toDate();
 
-      const exists = await Booking.findOne({ datetime: new Date(datetime) });
+      const exists = await Booking.findOne({ datetime: istDate });
       if (!exists) {
-        const booking = new Booking({ name, email, phone: 'N/A', datetime: new Date(datetime) });
+        const booking = new Booking({ name, email, phone: 'N/A', datetime: istDate });
         await booking.save();
         console.log('✅ Saved booking from webhook');
       } else {
