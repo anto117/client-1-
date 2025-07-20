@@ -7,11 +7,10 @@ const http = require('http');
 const { Server } = require('socket.io');
 const axios = require('axios');
 const { google } = require('googleapis');
-const serviceAccount = require('./quantum-toolbox-466507-n4-b98cb35ded63.json'); // 👈 Update with your JSON filename
 
 const app = express();
 const server = http.createServer(app);
-const CLIENT_URL = 'http://localhost:3000';
+const CLIENT_URL = 'http://localhost:3000'; // Update to frontend URL when deployed
 
 app.use(cors({
   origin: CLIENT_URL,
@@ -20,12 +19,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
-// ✅ MongoDB Connection
+// ✅ MongoDB
 mongoose.connect(process.env.MONGO_URI)
   .then(() => console.log('✅ MongoDB connected'))
   .catch(err => console.error('❌ MongoDB connection error:', err));
 
-// ✅ Nodemailer Setup
+// ✅ Nodemailer
 const transporter = nodemailer.createTransport({
   service: 'gmail',
   auth: {
@@ -34,12 +33,26 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// ✅ Google Calendar Setup
-const calendar = google.calendar('v3');
+// ✅ Google Calendar Setup (from environment variables)
+const credentials = {
+  type: process.env.GOOGLE_TYPE,
+  project_id: process.env.GOOGLE_PROJECT_ID,
+  private_key_id: process.env.GOOGLE_PRIVATE_KEY_ID,
+  private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+  client_email: process.env.GOOGLE_CLIENT_EMAIL,
+  client_id: process.env.GOOGLE_CLIENT_ID,
+  auth_uri: process.env.GOOGLE_AUTH_URI,
+  token_uri: process.env.GOOGLE_TOKEN_URI,
+  auth_provider_x509_cert_url: process.env.GOOGLE_AUTH_PROVIDER_X509_CERT_URL,
+  client_x509_cert_url: process.env.GOOGLE_CLIENT_X509_CERT_URL,
+  universe_domain: process.env.GOOGLE_UNIVERSE_DOMAIN,
+};
+
 const auth = new google.auth.GoogleAuth({
-  credentials: serviceAccount,
+  credentials,
   scopes: ['https://www.googleapis.com/auth/calendar'],
 });
+const calendar = google.calendar('v3');
 
 // ✅ Booking Schema
 const bookingSchema = new mongoose.Schema({
@@ -63,9 +76,7 @@ const bookingSchema = new mongoose.Schema({
 const Booking = mongoose.model('Booking', bookingSchema);
 
 // ✅ Routes
-app.get('/', (req, res) => {
-  res.send('API is running');
-});
+app.get('/', (req, res) => res.send('API is running'));
 
 app.get('/api/bookings', async (req, res) => {
   const bookings = await Booking.find().sort({ datetime: 1 });
@@ -90,7 +101,7 @@ app.post('/api/book', async (req, res) => {
 
   io.emit('bookingConfirmed', { name, datetime, phone });
 
-  // ✅ Cal.com API Integration
+  // ✅ Cal.com API
   try {
     const calRes = await axios.post(
       'https://api.cal.com/v1/bookings',
@@ -109,13 +120,13 @@ app.post('/api/book', async (req, res) => {
     );
     console.log('📆 Booked on Cal.com:', calRes.data);
   } catch (err) {
-    console.error('❌ Failed to create Cal.com booking:', err.response?.data || err.message);
+    console.error('❌ Cal.com error:', err.response?.data || err.message);
   }
 
-  // ✅ Google Calendar Insertion (without attendees)
+  // ✅ Google Calendar Insertion (no attendees)
   try {
     const authClient = await auth.getClient();
-    const calendarId = 'madukkakuzhydental1@gmail.com'; // 👈 Your calendar email ID
+    const calendarId = 'madukkakuzhydental1@gmail.com';
 
     const event = {
       summary: `Appointment - ${name}`,
@@ -136,7 +147,7 @@ app.post('/api/book', async (req, res) => {
       resource: event,
     });
 
-    console.log('📅 Event added to Google Calendar');
+    console.log('📅 Google Calendar event added');
   } catch (error) {
     console.error('❌ Google Calendar error:', error.message);
   }
@@ -156,9 +167,9 @@ app.post('/api/book', async (req, res) => {
           <p>Thank you!</p>
         `,
       });
-      console.log(`📧 Confirmation email sent to ${email}`);
+      console.log(`📧 Email sent to ${email}`);
     } catch (error) {
-      console.error('❌ Email send failed:', error);
+      console.error('❌ Email send error:', error);
     }
   }
 
@@ -209,7 +220,7 @@ app.post('/api/webhook', async (req, res) => {
   }
 });
 
-// ✅ WebSocket
+// ✅ WebSocket Setup
 const io = new Server(server, {
   cors: {
     origin: CLIENT_URL,
@@ -223,7 +234,7 @@ io.on('connection', (socket) => {
   });
 });
 
-// ✅ Server Start
+// ✅ Start Server
 const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => {
   console.log(`🚀 Server running at http://localhost:${PORT}`);
