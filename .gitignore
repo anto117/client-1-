@@ -53,3 +53,5 @@ backend/*.json
 backend/.env
 backend/*.json
 
+.env
+/frontend/.env
