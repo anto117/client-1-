@@ -4,7 +4,6 @@ import confetti from 'canvas-confetti';
 import { motion } from 'framer-motion';
 import { io } from 'socket.io-client';
 
-// ✅ Local backend URL from .env
 const SOCKET_URL = process.env.REACT_APP_API;
 
 function UserForm() {
@@ -13,6 +12,7 @@ function UserForm() {
     email: '',
     phone: '',
     datetime: '',
+    doctor: '', // ✅ Added doctor field
   });
 
   const [message, setMessage] = useState('');
@@ -135,9 +135,7 @@ function UserForm() {
             }
             required={field !== 'email'}
             style={inputStyle}
-            whileFocus={{
-              scale: 1.02,
-            }}
+            whileFocus={{ scale: 1.02 }}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{
@@ -149,6 +147,30 @@ function UserForm() {
             }}
           />
         ))}
+
+        {/* ✅ Doctor Dropdown */}
+        <motion.select
+          name="doctor"
+          value={form.doctor}
+          onChange={handleChange}
+          required
+          style={inputStyle}
+          whileFocus={{ scale: 1.02 }}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{
+            delay: 0.5,
+            duration: 0.5,
+            type: 'spring',
+            stiffness: 300,
+            damping: 20,
+          }}
+        >
+          <option value="">Select Doctor</option>
+          <option value="Dr. John">Dr. John</option>
+          <option value="Dr. Maria">Dr. Maria</option>
+          <option value="Dr. Arjun">Dr. Arjun</option>
+        </motion.select>
 
         <motion.button
           type="submit"
